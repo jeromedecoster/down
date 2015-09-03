@@ -58,5 +58,5 @@ function comment (line) {
 
 var urls = getUrls()
 
-if (!urls.length) opn(FILE, {app: 'notepad'})
+if (!urls.length) opn(FILE)
 else check()
