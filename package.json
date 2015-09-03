@@ -1,0 +1,18 @@
+{
+  "name": "down",
+  "version": "0.1.0",
+  "description": "down",
+  "bin": "cli.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/jeromedecoster/down.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "opn": "^3.0.2"
+  }
+}
