@@ -51,4 +51,4 @@ while read rar; do
   echo "unrar:$rar"
   unrar e -c- -y "$rar" *.pdf *.mkv *.avi *.mp4 | sed '/^$/d' | grep -v -i ^UNRAR
   echo
-done < <(echo "$rars" | sed '/^$/d')
+done < <(echo "$rars" | grep -F -e ".part001.rar" -e ".part01.rar" -e ".part1.rar" && echo "$rars" | grep -F -v ".part" | sed '/^$/d')
