@@ -1,17 +1,13 @@
-# Down
+# down
 
-Downloads URLs with chrome
+> Download URLs with curl
 
 ## Install
 
-Install with <a href="https://docs.npmjs.com/cli/install" target="_blank">npm</a> directly from the <a href="https://github.com/jeromedecoster/down" target="_blank">github repository</a>
-
 ```
-npm install -g jeromedecoster/down
+npm i -g jeromedecoster/down
 ```
 
-# Notes
+## Notes
 
-Windows tool
-
-Node 0.12 required
+Unix tool
