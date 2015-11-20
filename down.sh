@@ -8,7 +8,7 @@ nl=$'\n'
 
 opn() {
   [[ ! -f "$file" ]] && touch "$file"
-  open "$file"
+  [[ -n `which open` ]] && open "$file" || xdg-open "$file"
 }
 
 [[ $# -gt 0 || ! -f "$file" || `grep -c ^http "$file"` -eq 0 ]] && opn && exit 0
@@ -33,7 +33,9 @@ while read url; do
   if [[ -n "$name" ]]; then
     echo "name:$name"
     if [[ ! -f "$dir/$name" ]]; then
+      start=`date +'%s'`
       curl -L -n -# "$url" -o "$dir/$name"
+      echo "duration:$((`date +'%s'` - $start)) seconds"
       rars="${rars}${name}${nl}"
     else
       echo "already downloaded, skip"
@@ -46,9 +48,18 @@ while read url; do
 done < <(grep ^http "$file")
 
 
-cd "$dir"
-while read rar; do
-  echo "unrar:$rar"
-  unrar e -c- -y "$rar" *.pdf *.mkv *.avi *.mp4 | sed '/^$/d' | grep -v -i ^UNRAR
+
+extract() {
+  echo "unrar:$1"
+  start=`date +'%s'`
+  unrar e -c- -y "$1" | sed '/^$/d' | grep -v -i ^unrar
+  echo "duration:$((`date +'%s'` - $start)) seconds"
   echo
-done < <(echo "$rars" | grep -F -e ".part001.rar" -e ".part01.rar" -e ".part1.rar" && echo "$rars" | grep -F -v ".part" | sed '/^$/d')
+}
+
+cd "$dir"
+
+rars=`echo "$rars" | grep rar$ | grep -Fv ".part" && echo "$rars" | grep rar$ | grep "\.part0*1\.rar"`
+echo "$rars" | while read rar; do
+  extract "$rar"
+done
