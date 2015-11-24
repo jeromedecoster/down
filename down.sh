@@ -49,17 +49,23 @@ done < <(grep ^http "$file")
 
 
 
+filter() {
+  cat - | awk "{ if ($1 /rar$/ && ($1 /\.part/ == 0 || $1 /\.part0*1\./)) { print } }"
+}
+
 extract() {
   echo "unrar:$1"
   start=`date +'%s'`
-  unrar e -c- -y "$1" | sed '/^$/d' | grep -v -i ^unrar
+  unrar e -c- -y -n*.mkv -n*.mp4 -n*.avi -n*.pdf "$rar" |
+  grep -v ^All |
+  grep "OK\s*$" |
+  sed "s/\.\.\.       /Extracting/"
   echo "duration:$((`date +'%s'` - $start)) seconds"
   echo
 }
 
 cd "$dir"
 
-rars=`echo "$rars" | grep rar$ | grep -Fv ".part" && echo "$rars" | grep rar$ | grep "\.part0*1\.rar"`
-echo "$rars" | while read rar; do
+echo "$rars" | filter | while read rar; do
   extract "$rar"
 done
