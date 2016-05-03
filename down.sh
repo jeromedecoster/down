@@ -8,7 +8,7 @@ nl=$'\n'
 
 opn() {
   [[ ! -f "$file" ]] && touch "$file"
-  [[ -n `which open` ]] && open "$file" || xdg-open "$file"
+  [[ -n `which xdg-open` ]] && xdg-open "$file" || open "$file"
 }
 
 [[ $# -gt 0 || ! -f "$file" || `grep -c ^http "$file"` -eq 0 ]] && opn && exit 0
