@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
-file=~/urls.txt
+file=`xdg-user-dir DOCUMENTS`/down.urls
 rars=""
 nl=$'\n'
 
 
 
 opn() {
-  [[ ! -f "$file" ]] && touch "$file"
-  [[ -n `which xdg-open` ]] && xdg-open "$file" || open "$file"
+  if [[ ! -f "$file" ]]; then
+    touch "$file"
+  fi
+  xdg-open "$file"
 }
 
 [[ $# -gt 0 || ! -f "$file" || `grep -c ^http "$file"` -eq 0 ]] && opn && exit 0

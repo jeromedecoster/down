@@ -10,6 +10,6 @@ npm i -g jeromedecoster/down
 
 ## Notes
 
-Unix tool
+Linux tool
 
 Login / password called from `~/.netrc` file
