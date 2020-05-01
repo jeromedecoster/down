@@ -1,0 +1,62 @@
+#!/bin/bash
+
+log() { echo -e "\e[38;5;82;4m${1}\e[0m \e[38;5;226m${@:2}\e[0m"; }
+err() { echo -e "\e[38;5;196;4m${1}\e[0m \e[38;5;87m${@:2}\e[0m" >&2; }
+
+FILE=$(xdg-user-dir DOCUMENTS)/down.txt
+DOWNLOAD=$(xdg-user-dir DOWNLOAD)
+
+open() {
+  xdg-open $FILE 2>/dev/null
+  exit
+}
+
+# first execution
+[[ ! -f $FILE ]] && { touch $FILE; open; }
+
+# no urls found
+[[ $(grep --count ^http $FILE) -eq 0 ]] && open;
+
+# no ~/.netrc file
+[[ ! -f ~/.netrc ]] && { err abort '~/.netrc file is required'; exit; }
+
+# no machine in ~/.netrc file
+MACHINE=$(base64 -d <<< MWZpY2hpZXIuY29tCg==)
+[[ -z $(grep $MACHINE ~/.netrc) ]] \
+  && { err abort "machine $MACHINE in ~/.netrc file is required"; exit; }
+
+STARTED=$(date +'%s')
+
+while true
+do
+  # exit if no more URL
+  [[ $(grep --count ^http $FILE) -eq 0 ]] && break;
+  # first available URL
+  URL=$(grep ^http $FILE | head -n 1)
+  # comment URL
+  sed --expression "s|$URL|-$URL|" --in-place $FILE
+  # get filename using --head
+  NAME=$(curl "$URL" \
+    --head \
+    --netrc \
+    --silent \
+    --location \
+    | grep ^Content-Disposition \
+    | sed 's|.*filename="||' \
+    | sed 's|";.*||')
+  
+  [[ -z $NAME ]] && { err skip no filename for $URL; continue; }
+  [[ -f "$DOWNLOAD/$NAME" ]] &&  { err skip already downloaded $NAME; continue; }
+
+  # download
+  log download $URL
+  log file $NAME
+  curl "$URL" \
+    --netrc \
+    --location \
+    --output "$DOWNLOAD/$NAME"
+done
+
+FINISHED=$(date +'%s')
+DURATION=$((FINISHED - STARTED))
+log downloaded in $(($DURATION / 60)) minutes and $(($DURATION % 60)) seconds

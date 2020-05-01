@@ -1,15 +1,23 @@
 # down
 
-> Download URLs with curl
+### install with curl
 
-## Install
-
+```bash
+curl raw.github.com/jeromedecoster/down/master/script.sh \
+    --location \
+    --silent \
+    | bash
 ```
-npm i -g jeromedecoster/down
+
+### install with wget
+
+```bash
+wget raw.github.com/jeromedecoster/down/master/script.sh \
+    --output-document=- \
+    --quiet \
+    | bash
 ```
 
 ## Notes
-
-Linux tool
 
 Login / password called from `~/.netrc` file
