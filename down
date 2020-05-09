@@ -1,7 +1,9 @@
 #!/bin/bash
 
-log() { echo -e "\e[38;5;82;4m${1}\e[0m \e[38;5;226m${@:2}\e[0m"; }
-err() { echo -e "\e[38;5;196;4m${1}\e[0m \e[38;5;87m${@:2}\e[0m" >&2; }
+log()   { echo -e "\e[30;47m ${1^^} \e[0m ${@:2}"; }
+info()  { echo -e "\e[48;5;28m ${1^^} \e[0m ${@:2}"; }
+warn()  { echo -e "\e[48;5;202m ${1^^} \e[0m ${@:2}" >&2; }
+error() { echo -e "\e[48;5;196m ${1^^} \e[0m ${@:2}" >&2; }
 
 FILE=$(xdg-user-dir DOCUMENTS)/down.txt
 DOWNLOAD=$(xdg-user-dir DOWNLOAD)
@@ -11,6 +13,15 @@ open() {
   exit
 }
 
+elapsed() {
+    local H=$(( $1 / 3600))
+    local M=$((($1 % 3600) / 60))
+    local S=$(( $1 % 60))
+    [[ $1 -gt 3599 ]] \
+        && info downloaded in $H hours $M minutes and $S seconds \
+        || info downloaded in $M minutes and $S seconds;
+}
+
 # first execution
 [[ ! -f $FILE ]] && { touch $FILE; open; }
 
@@ -18,12 +29,12 @@ open() {
 [[ $(grep --count ^http $FILE) -eq 0 ]] && open;
 
 # no ~/.netrc file
-[[ ! -f ~/.netrc ]] && { err abort '~/.netrc file is required'; exit; }
+[[ ! -f ~/.netrc ]] && { error abort '~/.netrc file is required'; exit; }
 
 # no machine in ~/.netrc file
 MACHINE=$(base64 -d <<< MWZpY2hpZXIuY29tCg==)
 [[ -z $(grep $MACHINE ~/.netrc) ]] \
-  && { err abort "machine $MACHINE in ~/.netrc file is required"; exit; }
+  && { error abort "machine $MACHINE in ~/.netrc file is required"; exit; }
 
 STARTED=$(date +'%s')
 
@@ -45,11 +56,11 @@ do
     | sed 's|.*filename="||' \
     | sed 's|";.*||')
   
-  [[ -z $NAME ]] && { err skip no filename for $URL; continue; }
-  [[ -f "$DOWNLOAD/$NAME" ]] &&  { err skip already downloaded $NAME; continue; }
+  [[ -z $NAME ]] && { warn skip no filename for $URL; continue; }
+  [[ -f "$DOWNLOAD/$NAME" ]] &&  { warn skip already downloaded $NAME; continue; }
 
   # download
-  log download $URL
+  info download $URL
   log file $NAME
   curl "$URL" \
     --netrc \
@@ -58,5 +69,5 @@ do
 done
 
 FINISHED=$(date +'%s')
-DURATION=$((FINISHED - STARTED))
-log downloaded in $(($DURATION / 60)) minutes and $(($DURATION % 60)) seconds
+elapsed $((FINISHED - STARTED))
+exit 0
